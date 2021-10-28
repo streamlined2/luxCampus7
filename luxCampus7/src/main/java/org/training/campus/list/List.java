@@ -22,6 +22,10 @@ public interface List<E> extends Iterable<E> {
 
 	int indexOf(E value);
 
+	int indexOf(E value, int startIndex);
+
 	int lastIndexOf(E value);
+
+	int lastIndexOf(E value, int startIndex);
 
 }

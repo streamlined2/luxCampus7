@@ -24,6 +24,16 @@ public class ArrayList<E> implements List<E> {
 		size = 0;
 	}
 
+	public ArrayList(E... data) {
+		chunk = new Object[data.length];
+		size = data.length;
+
+		int k = 0;
+		for (E e : data) {
+			chunk[k++] = e;
+		}
+	}
+
 	int capacity() {
 		return chunk.length;
 	}
@@ -32,7 +42,7 @@ public class ArrayList<E> implements List<E> {
 		return requestedCapacity * 3 / 2;
 	}
 
-	private void allocateInsert(int requestedCapacity, E value, int insertIndex) {
+	private void expandInsert(int requestedCapacity, E value, int insertIndex) {
 		Object[] newChunk = new Object[getNewCapacity(requestedCapacity)];
 		arraycopy(chunk, 0, newChunk, 0, insertIndex);
 		newChunk[insertIndex] = value;
@@ -51,18 +61,13 @@ public class ArrayList<E> implements List<E> {
 		add(value, size);
 	}
 
-	private void checkIndex(int index, int upperLimit) {
-		if (index < 0 || index > upperLimit)
-			throw new IndexOutOfBoundsException(String.format("index should be within [0..%d]", upperLimit));
-	}
-
 	@Override
 	public void add(E value, int index) {
-		checkIndex(index, size);
+		Objects.checkIndex(index, size + 1);
 		if (size() < capacity()) {
 			shiftInsert(value, index);
 		} else {
-			allocateInsert(size() + 1, value, index);
+			expandInsert(size() + 1, value, index);
 		}
 	}
 
@@ -74,13 +79,13 @@ public class ArrayList<E> implements List<E> {
 
 	@Override
 	public E remove(int index) {
-		checkIndex(index, size - 1);
+		Objects.checkIndex(index, size);
 		return removeShift(index);
 	}
 
 	@Override
 	public E get(int index) {
-		checkIndex(index, size - 1);
+		Objects.checkIndex(index, size);
 		return (E) chunk[index];
 	}
 
@@ -111,16 +116,17 @@ public class ArrayList<E> implements List<E> {
 
 	@Override
 	public boolean contains(E value) {
-		for (E e : this) {
-			if (Objects.equals(e, value))
-				return true;
-		}
-		return false;
+		return indexOf(value) >= 0;
 	}
 
 	@Override
 	public int indexOf(E value) {
-		for (int k = 0; k < size; k++) {
+		return indexOf(value, 0);
+	}
+
+	@Override
+	public int indexOf(E value, int startIndex) {
+		for (int k = startIndex; k < size; k++) {
 			if (Objects.equals(chunk[k], value))
 				return k;
 		}
@@ -129,7 +135,12 @@ public class ArrayList<E> implements List<E> {
 
 	@Override
 	public int lastIndexOf(E value) {
-		for (int k = size - 1; k >= 0; k--) {
+		return lastIndexOf(value, size - 1);
+	}
+
+	@Override
+	public int lastIndexOf(E value, int startIndex) {
+		for (int k = startIndex; k >= 0; k--) {
 			if (Objects.equals(chunk[k], value))
 				return k;
 		}
