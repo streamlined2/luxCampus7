@@ -28,4 +28,6 @@ public interface List<E> extends Iterable<E> {
 
 	int lastIndexOf(E value, int startIndex);
 
+	public Object[] toArray();
+
 }

@@ -1,5 +1,6 @@
 package org.training.campus.list;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -25,20 +26,20 @@ public class ArrayList<E> implements List<E> {
 	}
 
 	public ArrayList(E... data) {
-		chunk = new Object[data.length];
+		chunk = new Object[getNewCapacity(data.length)];
 		size = data.length;
+		arraycopy(data, 0, chunk, 0, size);
+	}
 
-		int k = 0;
-		for (E e : data) {
-			chunk[k++] = e;
-		}
+	public Object[] toArray() {
+		return Arrays.copyOf(chunk, size);
 	}
 
 	int capacity() {
 		return chunk.length;
 	}
 
-	private int getNewCapacity(int requestedCapacity) {
+	int getNewCapacity(int requestedCapacity) {
 		return requestedCapacity * 3 / 2;
 	}
 
@@ -54,6 +55,7 @@ public class ArrayList<E> implements List<E> {
 	private void shiftInsert(E value, int insertIndex) {
 		arraycopy(chunk, insertIndex, chunk, insertIndex + 1, size - insertIndex);
 		chunk[insertIndex] = value;
+		size++;
 	}
 
 	@Override
@@ -74,6 +76,7 @@ public class ArrayList<E> implements List<E> {
 	private E removeShift(int removeIndex) {
 		E value = (E) chunk[removeIndex];
 		arraycopy(chunk, removeIndex + 1, chunk, removeIndex, size - removeIndex - 1);
+		size--;
 		return value;
 	}
 
@@ -91,7 +94,7 @@ public class ArrayList<E> implements List<E> {
 
 	@Override
 	public E set(E value, int index) {
-		E oldValue = get(index);
+		final E oldValue = get(index);
 		chunk[index] = value;
 		return oldValue;
 	}
@@ -99,9 +102,7 @@ public class ArrayList<E> implements List<E> {
 	@Override
 	public void clear() {
 		size = 0;
-		for (int k = 0; k < chunk.length; k++) {
-			chunk[k] = null;
-		}
+		Arrays.fill(chunk, null);
 	}
 
 	@Override
